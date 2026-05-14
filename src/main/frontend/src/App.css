@@ -1,0 +1,92 @@
+/* сброс стилей */
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
+}
+
+.header {
+    background-color: #007bff;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.container {
+    padding: 20px;
+}
+
+/* три секции с белым фоном */
+.input-section, .results-section, .graph-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+/* страницы приложения должны быть адаптированы для отображения в 3 режимах */
+
+/* десктопный режим */
+.main-content-wrapper {
+    display: flex;
+    gap: 20px;
+    flex-direction: row;
+}
+
+.left-column {
+    flex: 2;
+}
+
+.right-column {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Планшетный режим */
+@media screen and (max-width: 1214px) {
+    .main-content-wrapper {
+        flex-direction: column-reverse;
+    }
+
+    .left-column, .right-column {
+        width: 100%;
+        flex: auto;
+    }
+
+    .right-column {
+        align-items: center;
+    }
+}
+
+/* мобильный режим */
+@media screen and (max-width: 714px) {
+    .header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .main-content-wrapper {
+        flex-direction: column;
+    }
+
+    .input-section, .results-section, .graph-container {
+        padding: 1rem;
+    }
+}
