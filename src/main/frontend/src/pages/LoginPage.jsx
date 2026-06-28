@@ -5,7 +5,6 @@ import {useDispatch, useSelector} from 'react-redux';
 import {loginUser, registerUser, clearError} from '../redux/authSlice';
 // навигация
 import {useNavigate} from 'react-router-dom';
-// красивые primerecat компоненты
 import {InputText} from 'primereact/inputtext';
 import {Password} from 'primereact/password';
 import {Button} from 'primereact/button';
@@ -91,7 +90,7 @@ const LoginPage = () => {
                             value={username}
                             onChange={(e) => {
                                 setUsername(e.target.value);
-                                setLocalError(null); // Сбрасываем ошибку при вводе
+                                setLocalError(null);
                             }}
                         />
                     </div>
@@ -104,7 +103,7 @@ const LoginPage = () => {
                                 setPassword(e.target.value);
                                 setLocalError(null);
                             }}
-                            feedback={true}
+                            feedback={false}
                             // глазок
                             toggleMask
                         />
@@ -112,7 +111,6 @@ const LoginPage = () => {
 
                     {displayError && (
                         <Message
-                            // severity="error": Красит сообщение в красный цвет и добавляет иконку крестика/восклицательного знака.
                             severity="error"
                             text={typeof displayError === 'string' ? displayError : "Ошибка"}
                             style={{marginTop: '1rem', width: '100%'}}

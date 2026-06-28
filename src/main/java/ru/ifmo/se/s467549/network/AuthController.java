@@ -7,10 +7,9 @@ import ru.ifmo.se.s467549.model.User;
 import ru.ifmo.se.s467549.persistence.UserRepository;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    // работа с БД
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 

@@ -51,7 +51,7 @@ public class ResultController {
      */
     // Aggregate root
     // tag::get-aggregate-root[]
-    @GetMapping("/results")
+    @GetMapping("/api/results")
     public PagedModel<EntityModel<Result>> all(
             @AuthenticationPrincipal User user,
             @RequestParam(defaultValue = "0") int page,
@@ -76,16 +76,14 @@ public class ResultController {
      * @param newResult, here i use @valid to check params without using db
      * @return ResponseEntity
      */
-    @PostMapping("/results")
+    @PostMapping("/api/results")
     public ResponseEntity<?> newResult(@Valid @RequestBody Result newResult, @AuthenticationPrincipal User user) {
 
-        // 1. Вычисляем попадание на сервере
         boolean isHit = areaCheckService.isHit(newResult.getX(), newResult.getY(), newResult.getR());
 
-        // 2. Заполняем служебные поля
         newResult.setHit(isHit);
         newResult.setTimestamp(LocalDateTime.now());
-        newResult.setUser(user); // Привязываем к текущему пользователю
+        newResult.setUser(user);
 
         // save to database and return ResponseEntity of response
         EntityModel<Result> entityModel = assembler.toModel(repository.save(newResult));
@@ -101,7 +99,7 @@ public class ResultController {
      * @param id
      * @return
      */
-    @GetMapping("/results/{id}")
+    @GetMapping("/api/results/{id}")
     public EntityModel<Result> one(@PathVariable Long id) {
 
         Result result = repository.findById(id)
@@ -120,7 +118,7 @@ public class ResultController {
         // HATEOAS core type Link is URI + relation
     }
 
-    @PutMapping("/results/{id}")
+    @PutMapping("/api/results/{id}")
     ResponseEntity<?> replaceResult(@RequestBody Result newResult, @PathVariable Long id) {
 
         Result updatedResult = repository.findById(id)
@@ -143,14 +141,14 @@ public class ResultController {
     }
 
     // clear all points
-    @DeleteMapping("/results")
+    @DeleteMapping("/api/results")
     public ResponseEntity<?> clear(@AuthenticationPrincipal User user) {
         List<Result> userResults = repository.findByUser(user);
         repository.deleteAll(userResults);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/results/{id}")
+    @DeleteMapping("/api/results/{id}")
     ResponseEntity<?> deleteResultPoint(@AuthenticationPrincipal User user, @PathVariable Long id) {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();

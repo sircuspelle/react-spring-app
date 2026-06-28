@@ -5,10 +5,7 @@ target/
 
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+.idea
 *.iws
 *.iml
 *.ipr
@@ -41,3 +38,15 @@ build/
 
 ### node js modules
 **/node_modules/
+
+# gradle results
+build/
+.gradle/
+src/main/frontend/dist
+
+# creds for database in docker
+.env
+# creds to join leetcode
+/src/main/frontend/cypress.env.json
+# 4 lab properties to connect database
+application.properties

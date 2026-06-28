@@ -1,4 +1,3 @@
-/* сброс стилей */
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -19,7 +18,6 @@ body {
     padding: 20px;
 }
 
-/* три секции с белым фоном */
 .input-section, .results-section, .graph-container {
     background: white;
     padding: 1.5rem;
@@ -38,9 +36,7 @@ label {
     font-weight: bold;
 }
 
-/* страницы приложения должны быть адаптированы для отображения в 3 режимах */
 
-/* десктопный режим */
 .main-content-wrapper {
     display: flex;
     gap: 20px;
@@ -58,7 +54,6 @@ label {
     align-items: flex-start;
 }
 
-/* Планшетный режим */
 @media screen and (max-width: 1214px) {
     .main-content-wrapper {
         flex-direction: column-reverse;
@@ -74,7 +69,6 @@ label {
     }
 }
 
-/* мобильный режим */
 @media screen and (max-width: 714px) {
     .header {
         flex-direction: column;
