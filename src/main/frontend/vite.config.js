@@ -5,9 +5,13 @@ export default defineConfig({
     plugins: [react()],
     root: 'src',
     build: {
-        outDir: '../../../../target/lab_4-1.0-SNAPSHOT',
+        outDir: '../dist',
         emptyOutDir: true,
     },
+//    build: {
+//        outDir: '../../../../target/lab_4-1.0-SNAPSHOT',
+//        emptyOutDir: true,
+//    },
     server: {
         proxy: {
             '/api': {
@@ -15,7 +19,7 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
                 ws: true,
-                rewrite: (path) => path.replace(/^\/api/, ''),
+//                rewrite: (path) => path.replace(/^\/api/, ''),
                 configure: (proxy, _options) => {
                     proxy.on('error', (err, _req, _res) => {
                         console.log('proxy error', err);

@@ -12,8 +12,7 @@ const PointForm = () => {
 
     // локальный стейт для формы
     const [x, setX] = useState("0");
-    const [y, setY] = useState(0); // Slider работает с числами
-    // R берем из Redux, так как он общий с графиком, но редактируем локально
+    const [y, setY] = useState(0);
     const [localR, setLocalR] = useState(rValue);
 
     const handleSubmit = (e) => {
@@ -53,10 +52,8 @@ const PointForm = () => {
                     />
                 </div>
 
-                {/* y: Slider (-3 ... 5) */}
                 <div className="form-group">
                     <label>Y: {y}</label>
-                    {/* Slider в PrimeReact по умолчанию 0-100 */}
                     <Slider
                         value={y}
                         onChange={(e) => setY(e.value)}
@@ -67,14 +64,12 @@ const PointForm = () => {
                     />
                 </div>
 
-                {/* r: Text (-5 ... 5) */}
                 <div className="form-group">
                     <label>R (-5 ... 5):</label>
                     <InputText
                         value={localR}
                         onChange={(e) => {
                             setLocalR(e.target.value);
-                            // живая перерисовка
                             const val = parseFloat(e.target.value);
                             if(!isNaN(val) && val > 0) dispatch(setRValue(val));
                         }}

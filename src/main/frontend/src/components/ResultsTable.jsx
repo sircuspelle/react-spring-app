@@ -9,7 +9,6 @@ const ResultsTable = () => {
     const { points, totalElements, currentPage, pageSize } = useSelector(state => state.points);
     const dispatch = useDispatch();
 
-    // PrimeReact передает в этот метод объект: { first, rows, page, pageCount }
     const onPage = (event) => {
         // event.page - индекс новой страницы
         // event.rows - количество строк
@@ -19,7 +18,6 @@ const ResultsTable = () => {
         }));
     };
 
-    // красивая отрисовка результата
 
     const resultTemplate = (rowData) => {
         return (
@@ -46,7 +44,6 @@ const ResultsTable = () => {
                 />
             </div>
 
-            {/*paginator постраничный вывод*/}
             <DataTable
                 value={points}
                 lazy

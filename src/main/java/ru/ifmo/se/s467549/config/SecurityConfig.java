@@ -57,15 +57,28 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 // авторизуем шттп запросы
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/assets/**",
+                                "/static/**",
+                                "/*.ico",
+                                "/*.js",
+                                "/*.css",
+                                "/*.json",
+                                "/*.png"
+                        ).permitAll()
                         // разрешаем регистрацию
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+
+                        .requestMatchers("/api/**").authenticated()
                         // разрешаем всем смотреть ошибки - не обязательно
                         .requestMatchers("/error").permitAll()
                         // для всего остального разрешаем только authenticated пользователям
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 // аутентификация с помощью HTTP Basic
-                // логин и пароль кодируются в Base64 и кладутся в заголовок Authorization: Basic ...
+                // логин и пароль кодируются в Base64 и кладутся в заголовок Authorization: Basic
                 .httpBasic(
                         httpBasic -> httpBasic
                                 .authenticationEntryPoint((request, response, authException) -> {

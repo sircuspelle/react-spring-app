@@ -9,10 +9,6 @@ import ru.ifmo.se.s467549.model.User;
 
 import java.util.List;
 
-/**
- * готовый компонент доступа к данным
- * умеет работать с параметрами заданными в Pagaeable
- */
 public interface ResultRepository extends JpaRepository<Result, Long> {
     Page<Result> findByUser(User user, Pageable pageable);
 

@@ -13,7 +13,6 @@ const Graph = () => {
     const HEIGHT = 400;
     const R_PIXELS = WIDTH / 3;
 
-    // Функция отрисовки
     const draw = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -54,7 +53,7 @@ const Graph = () => {
             const canvasX = centerX + (point.x / rValue) * R_PIXELS;
             const canvasY = centerY - (point.y / rValue) * R_PIXELS;
 
-            ctx.fillStyle = point.hit ? '#28a745' : '#dc3545';
+            ctx.fillStyle = point.hit ? 'green' : 'red';
             ctx.beginPath();
             ctx.arc(canvasX, canvasY, 4, 0, 2 * Math.PI);
             ctx.fill();

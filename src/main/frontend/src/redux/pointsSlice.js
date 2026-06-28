@@ -4,13 +4,11 @@ import axios from 'axios';
 import {logout} from './authSlice'
 
 const getAuthHeader = (getState) => {
-    // optional chaining operator
     const token = getState().auth.user?.token;
     return {headers: {Authorization: `Basic ${token}`}};
 };
 
 
-// теперь fetch будет принимать параметры пагинации
 export const fetchPoints = createAsyncThunk(
     'points/fetchPoints',
     async (
@@ -27,7 +25,7 @@ export const fetchPoints = createAsyncThunk(
                 getAuthHeader(getState)
             );
             // Spring HATEOAS возвращает _embedded.resultList
-            // Если список пуст, _embedded может отсутствовать
+            // если список пуст, _embedded может отсутствовать
             // сейчас вот так стало
             // {
             //   "_embedded": { "resultList": [...] },
@@ -49,7 +47,7 @@ export const fetchPoints = createAsyncThunk(
 
 export const addPoint = createAsyncThunk(
     'points/addPoint',
-    // pointData — это объект {x, y, r}, который прилетит из компонента
+    // pointData — это объект {x, y, r} из компонента
     async (pointData, {getState, dispatch, rejectWithValue}) => {
         try {
             const response = await axios.post('/api/results', pointData, getAuthHeader(getState));
@@ -83,7 +81,7 @@ const pointsSlice = createSlice({
         totalElements: 0,
         currentPage: 0,
         pageSize: 10,
-        rValue: 1, // Значение r храним тут, так как оно нужно и графику, и форме
+        rValue: 1, // r нужно и графику, и форме
         status: 'idle',
         error: null
     },

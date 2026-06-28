@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-// useEffect для side эффектовв
 import { useDispatch } from 'react-redux';
 import { fetchPoints } from '../redux/pointsSlice';
 import PointForm from '../components/PointForm';
@@ -9,7 +8,6 @@ import ResultsTable from '../components/ResultsTable';
 const MainPage = () => {
     const dispatch = useDispatch();
 
-    // после монтирования компонента применится useEffect
     useEffect(() => {
         dispatch(fetchPoints());
     }, [dispatch]);

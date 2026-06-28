@@ -1,0 +1,352 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.github.node-gradle.node' version '7.0.1'
+    id 'io.gatling.gradle' version '3.11.3'
+}
+
+ext.springProcess = null
+
+java {
+    sourceCompatibility = '17'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+
+
+node {
+    download = true
+    version="22.12.0"
+    nodeProjectDir = file("${project.projectDir}/src/main/frontend")
+}
+
+// можно заменить на dependsOn 'npmInstall' и 'npm_run_build', но так более явно
+task npmInstallTask(type: NpmTask) {
+    group = 'Lab utility'
+    workingDir = file("${project.projectDir}/src/main/frontend")
+    args = ['install']
+}
+task buildFrontend(type: NpmTask) {
+    group = 'Lab utility'
+    dependsOn npmInstallTask
+    args = ['run', 'build']
+}
+task copyFrontend(type: Copy){
+    group = 'Lab utility'
+    description = 'copy vite builded react to the resources/static dir'
+    dependsOn buildFrontend
+    from "${project.projectDir}/src/main/frontend/dist"
+    into "${layout.buildDirectory.get().asFile}/resources/main/static"
+}
+processResources.dependsOn copyFrontend
+
+
+
+task labCompile{
+    group = 'Lab tasks'
+    description = 'LAB: compile'
+    dependsOn 'compileJava'
+    doLast { println "compiled successfully" }
+}
+
+task labBuild {
+    group = 'Lab tasks'
+    description = 'LAB: build'
+    dependsOn labCompile, 'bootJar'
+    bootJar {
+        archiveFileName = project.hasProperty('app.jarName') ? project.property('app.jarName') : 'lab4.jar'
+        manifest {
+            attributes (
+                    'Manifest-Version': '1.0',
+                    'Implementation-Version': project.property('app.version'),
+                    'Start-Class': project.property('app.mainClass')
+            )
+        }
+    }
+    doLast { println "build successfully" }
+}
+
+
+
+
+task labClean {
+    group = 'Lab tasks'
+    description = 'LAB: clean'
+    dependsOn 'clean'
+
+    delete "${projectDir}/src/main/frontend/dist"
+    delete "${projectDir}/src/main/frontend/node_modules"
+    delete "${projectDir}/src/main/frontend/tests/node_modules"
+    delete "${projectDir}/src/main/frontend/test-results"
+    delete "${projectDir}/src/main/frontend/tests/test-results"
+
+
+    doLast{
+        println "clean succesfull"
+    }
+
+}
+
+
+
+sourceSets {
+    test {
+        java {
+            srcDirs = ['src/test/java']
+        }
+    }
+}
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = false
+        exceptionFormat = 'full'
+    }
+}
+task startSpringApp {
+    group = 'Lab utility'
+    description = 'run spring boot for functional tests'
+    dependsOn labBuild
+
+    doLast {
+        try {
+            new Socket("localhost", 8080).close()
+            throw new GradleException("8080 gateway already taken, pls free")
+        }
+        catch (ConnectException e) {
+            println "8080 gateway is free - thats cool"
+        }
+
+        def jarPath = "${layout.buildDirectory.get().asFile}/libs/lab4.jar"
+        println "starting Spring Boot: $jarPath"
+        ProcessBuilder pb = new ProcessBuilder("java", "-jar", jarPath)
+        pb.directory(project.projectDir)
+        def logFile  = file("${layout.buildDirectory.get().asFile}/server.log")
+        def errFile  = file("${layout.buildDirectory.get().asFile}/server-err.log")
+        pb.redirectOutput(logFile)
+        pb.redirectError(errFile)
+        ext.springProcess = pb.start()
+        println "waiting for server on :8080..."
+        boolean ready = false
+        long deadline = System.currentTimeMillis() + 90_000L
+        while (System.currentTimeMillis() < deadline) {
+            if (!ext.springProcess.isAlive()) {
+                throw new GradleException(
+                        "spring boot process died!"
+                )
+            }
+            try {
+                new Socket("localhost", 8080).close()
+                ready = true
+                break
+            } catch (ConnectException ignored) {
+                Thread.sleep(2000)
+            }
+        }
+        if (ready) {
+            println "server is up!"
+        } else {
+            ext.springProcess.destroyForcibly()
+            throw new GradleException(
+                    "server did not start in 90s"
+            )
+        }
+    }
+}
+task stopSpringApp {
+    group = 'Lab utility'
+    description = 'stop temporary Spring Boot'
+    doLast {
+        println "stoppping spring boot softly..."
+        if (ext.has('springProcess') && ext.springProcess != null) {
+            ext.springProcess.destroyForcibly()
+            ext.springProcess.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)
+            ext.springProcess = null
+        }
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            println "stoppping spring boot hardly for windows..."
+            try {
+                def netstat = "cmd /c netstat -ano | findstr :8080".execute()
+                netstat.waitFor()
+                netstat.text.readLines().each { line ->
+                    def parts = line.trim().split(/\s+/)
+                    def pid = parts.last()
+                    if (pid.isInteger() && pid != "0") {
+                        "taskkill /F /PID $pid".execute().waitFor()
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+    }
+}
+task functionalTest(type: NpxTask) {
+    group = 'Lab utility'
+    description = 'cypress func tests'
+
+    dependsOn startSpringApp
+    finalizedBy stopSpringApp
+
+    // args = ['run', '--spec', 'cypress/e2e/app.cy.js', '--browser', 'chrome']
+    println "running cypress/e2e/${System.getenv("TEST_SPEC")}.cy.js"
+    command = "cypress"
+    args = ['run', '--spec', "cypress/e2e/${System.getenv("TEST_SPEC")}.cy.js", '--browser', 'chrome']
+    workingDir = file("${project.projectDir}/src/main/frontend")
+}
+
+functionalTest.mustRunAfter 'test'
+test.dependsOn labBuild
+task labTest {
+    group = 'Lab tasks'
+    description = 'LAB: test'
+    dependsOn 'test', functionalTest
+    doLast { println "all tests done" }
+}
+
+task playwrightfunctionalTest(type: NpxTask) {
+    group = 'Lab utility'
+    description = 'playwright func tests'
+
+    dependsOn startSpringApp
+    finalizedBy stopSpringApp
+
+    command = 'playwright'
+    args = ['test']
+    workingDir = file("${project.projectDir}/src/main/frontend")
+}
+
+
+
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+import java.security.MessageDigest
+// можно переделать под labBuild, тогда Jar не надо
+task labDoc(type: Jar) {
+    group = 'Lab tasks'
+    description = 'LAB: doc'
+    // тут можно оставить javadoc
+    dependsOn labCompile, 'javadoc'
+
+    archiveFileName = "lab4-doc.jar"
+    destinationDirectory = file("${layout.buildDirectory.get().asFile}/libs")
+
+    // подсчёт хэша может быть и в doLast
+    doFirst {
+        println "hash computing..."
+        def md5 = MessageDigest.getInstance("MD5")
+        def sha1 = MessageDigest.getInstance("SHA-1")
+
+        int count = 0
+        fileTree('src').filter { it.isFile() }.each { file ->
+            count++
+            if (count % 500 == 0) println "processing file number $count ..."
+            file.withInputStream { is ->
+                byte[] buffer = new byte[8192]
+                int read
+
+                while ((read = is.read(buffer)) > 0) {
+                    md5.update(buffer, 0, read)
+                    sha1.update(buffer, 0, read)
+                }
+            }
+        }
+
+        // можно bootJar докинуть
+        manifest {
+            attributes(
+                    'Manifest-Version': '1.0',
+                    'Implementation-Version': project.property('app.version'),
+                    'Project-MD5': md5.digest().encodeHex().toString(),
+                    'Project-SHA-1': sha1.digest().encodeHex().toString()
+            )
+        }
+        // к bootJar добвить from into для javadoc
+    }
+
+    from sourceSets.main.output
+    from("${layout.buildDirectory.get().asFile}/docs/javadoc") { into "javadoc" }
+
+    doLast { println "doc ended! jar in build/libs/lab4-doc.jar, javadoc stored in build/docs" }
+
+    // finalizedBy 'bootJar'
+}
+
+task labTeam {
+    group = 'Lab tasks'
+    description = 'LAB: team'
+    doLast {
+        def process = "git log -n 3 --format=%H".execute()
+        process.waitFor()
+        def commits = process.text.readLines()
+
+        if (commits.size() < 3) {
+            println "<3 commits found in repo"
+            return
+        }
+
+        def workDir = file("${layout.buildDirectory.get().asFile}/team_work")
+        def jarsDir = file("${layout.buildDirectory.get().asFile}/libs/team_jars")
+
+        delete workDir
+        delete jarsDir
+
+        workDir.mkdirs()
+        jarsDir.mkdirs()
+
+        [commits[1], commits[2]].each {
+            rev -> println "processing revision $rev"
+                def cloneDir = file("$workDir/$rev")
+
+                "git clone . ${cloneDir.absolutePath}".execute().waitFor()
+                "git -C ${cloneDir.absolutePath} checkout $rev".execute().waitFor()
+
+                def gradlew = System.getProperty("os.name").toLowerCase().contains("win") ? "gradlew.bat" : "./gradlew"
+
+                if (gradlew == "./gradlew") {
+                    "chmod +x gradlew".execute(null, cloneDir).waitFor()
+                }
+
+                def proc = "$gradlew labBuild".execute(null, cloneDir)
+                proc.waitForProcessOutput(System.err, System.out)
+
+                if (proc.exitValue() != 0) {
+                    throw new GradleException("collect $rev fault")
+                }
+
+                copy {
+                    from "${cloneDir.absolutePath}/build/libs"
+                    into jarsDir
+                    include "*.jar"
+                    rename { String fileName -> fileName.replace(".jar", "-${rev}.jar") }
+                }
+        }
+
+        ant.zip(destfile: "${layout.buildDirectory.get().asFile}/team.zip", basedir: jarsDir.absolutePath)
+        println "team.zip created successfully as build/libs/team_work too"
+    }
+}

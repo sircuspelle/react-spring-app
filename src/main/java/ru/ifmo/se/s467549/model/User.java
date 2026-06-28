@@ -19,7 +19,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    // Конструкторы, геттеры и сеттеры
     public User() {}
     public User(String username, String password) {
         this.username = username;
@@ -34,7 +33,7 @@ public class User implements UserDetails {
     // UserDetails методы для реализации интерфейса для SpringSecurity
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(); // без ролей
+        return List.of();
     }
     @Override
     public String getPassword() { return password; }
