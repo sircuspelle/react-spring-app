@@ -9,7 +9,7 @@ public class AreaCheckService {
         if (r < 0) return false;
 
         if (x > 0 && y >= 0) {
-            return (x * x + y * y) <= (r * r);
+            return 4 * (x * x + y * y) <= (r * r);
         }
 
         if (x <= 0 && y >= 0) {

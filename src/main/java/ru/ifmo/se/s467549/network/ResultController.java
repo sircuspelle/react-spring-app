@@ -14,6 +14,10 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import ru.ifmo.se.s467549.jmx.PointsCounter;
+import ru.ifmo.se.s467549.jmx.PointMissedEvent;
+import ru.ifmo.se.s467549.jmx.PointSetEvent;
 import ru.ifmo.se.s467549.model.Result;
 import ru.ifmo.se.s467549.model.User;
 import ru.ifmo.se.s467549.service.ResultModelAssembler;
@@ -22,9 +26,6 @@ import ru.ifmo.se.s467549.service.AreaCheckService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 // @RestController means that data will be written straight into the response body instead of rendering template
 @RestController
@@ -37,10 +38,13 @@ public class ResultController {
 
     private final AreaCheckService areaCheckService;
 
-    public ResultController(ResultRepository repository, ResultModelAssembler assembler, AreaCheckService areaCheckService) {
+    private final PointsCounter pointsCounter;
+
+    public ResultController(ResultRepository repository, ResultModelAssembler assembler, AreaCheckService areaCheckService, PointsCounter pointsCounter) {
         this.repository = repository;
         this.assembler = assembler;
         this.areaCheckService = areaCheckService;
+        this.pointsCounter = pointsCounter;
     }
 
     /**
@@ -79,11 +83,32 @@ public class ResultController {
     @PostMapping("/api/results")
     public ResponseEntity<?> newResult(@Valid @RequestBody Result newResult, @AuthenticationPrincipal User user) {
 
+        PointSetEvent jfrEvent = new PointSetEvent();
+        jfrEvent.begin();
+
         boolean isHit = areaCheckService.isHit(newResult.getX(), newResult.getY(), newResult.getR());
 
         newResult.setHit(isHit);
         newResult.setTimestamp(LocalDateTime.now());
         newResult.setUser(user);
+
+        pointsCounter.addPoint(newResult.getX(), newResult.getY(), isHit);
+
+        jfrEvent.x = newResult.getX();
+        jfrEvent.y = newResult.getY();
+        jfrEvent.r = newResult.getR();
+        jfrEvent.isHit = isHit;
+        jfrEvent.commit();
+
+        if (!isHit) {
+            PointMissedEvent missEvent = new PointMissedEvent();
+            missEvent.begin();
+            
+            missEvent.x = newResult.getX();
+            missEvent.y = newResult.getY();
+            
+            missEvent.commit();
+        }
 
         // save to database and return ResponseEntity of response
         EntityModel<Result> entityModel = assembler.toModel(repository.save(newResult));

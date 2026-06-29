@@ -5,7 +5,7 @@ target/
 
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -41,6 +41,7 @@ build/
 
 # gradle results
 build/
+bin/
 .gradle/
 src/main/frontend/dist
 
@@ -50,3 +51,8 @@ src/main/frontend/dist
 /src/main/frontend/cypress.env.json
 # 4 lab properties to connect database
 application.properties
+
+.gradle/
+bin/
+*.password
+server_keystore.jks
