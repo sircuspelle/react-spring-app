@@ -14,6 +14,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ru.ifmo.se.s467549.jmx.PointsCounter;
 import ru.ifmo.se.s467549.model.Result;
 import ru.ifmo.se.s467549.model.User;
 import ru.ifmo.se.s467549.service.ResultModelAssembler;
@@ -37,10 +38,13 @@ public class ResultController {
 
     private final AreaCheckService areaCheckService;
 
-    public ResultController(ResultRepository repository, ResultModelAssembler assembler, AreaCheckService areaCheckService) {
+    private final PointsCounter pointsCounter;
+
+    public ResultController(ResultRepository repository, ResultModelAssembler assembler, AreaCheckService areaCheckService, PointsCounter pointsCounter) {
         this.repository = repository;
         this.assembler = assembler;
         this.areaCheckService = areaCheckService;
+        this.pointsCounter = pointsCounter;
     }
 
     /**
@@ -79,7 +83,13 @@ public class ResultController {
     @PostMapping("/api/results")
     public ResponseEntity<?> newResult(@Valid @RequestBody Result newResult, @AuthenticationPrincipal User user) {
 
-        boolean isHit = areaCheckService.isHit(newResult.getX(), newResult.getY(), newResult.getR());
+        Double x = newResult.getX();
+        Double y = newResult.getY();
+        Double r = newResult.getR();
+
+        boolean isHit = areaCheckService.isHit(x, y, r);
+
+        pointsCounter.clickMade(x, y, isHit);
 
         newResult.setHit(isHit);
         newResult.setTimestamp(LocalDateTime.now());

@@ -50,3 +50,4 @@ src/main/frontend/dist
 /src/main/frontend/cypress.env.json
 # 4 lab properties to connect database
 application.properties
+/.gradle/
