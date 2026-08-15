@@ -2,6 +2,7 @@ package ru.ifmo.se.s467549.service;
 
 import org.springframework.stereotype.Service;
 
+// TODO: fix radius in fuigure right upper corner
 @Service
 public class AreaCheckService {
 

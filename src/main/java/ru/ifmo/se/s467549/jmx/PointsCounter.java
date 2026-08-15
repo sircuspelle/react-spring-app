@@ -1,5 +1,6 @@
 package ru.ifmo.se.s467549.jmx;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.management.Notification;
@@ -14,6 +15,12 @@ public class PointsCounter extends NotificationBroadcasterSupport implements Poi
     private int consecutiveMisses = 0;
     private long sequenceNumber = 1;
     private AreaCounter areaCounter = new AreaCounter();
+    private MissPercentage missPercentage;
+
+    @Autowired
+    public PointsCounter(MissPercentage missPercentage){
+        this.missPercentage = missPercentage;
+    }
 
     public synchronized void clickMade(Double x, Double y, boolean isHit) {
         this.pointsCount += 1;
@@ -41,6 +48,7 @@ public class PointsCounter extends NotificationBroadcasterSupport implements Poi
             this.consecutiveMisses = 0;
         }
 
+        missPercentage.setPercentage(pointsCount, missesCount);
         areaCounter.click(x, y);
 
     }

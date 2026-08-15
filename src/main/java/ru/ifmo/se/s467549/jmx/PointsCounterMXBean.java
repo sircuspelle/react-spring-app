@@ -1,7 +1,6 @@
 package ru.ifmo.se.s467549.jmx;
 
 import javax.management.MXBean;
-import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.OpenDataException;
 
 /*
