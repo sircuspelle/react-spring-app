@@ -53,18 +53,19 @@ public class PointsCounter extends NotificationBroadcasterSupport implements Poi
         return missesCount;
     }
 
-    public CompositeData getAreaCount() throws OpenDataException {
-        String[] names = { "First Quarter", "Second Quarter", "Third Quarter", "Fourth Quarter" };
-
-        OpenType<?>[] itemTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
-
-        CompositeType type = new CompositeType(
-                "AreaCounter", "Counters by quarters", names, names, itemTypes);
-
-        Object[] values = { areaCounter.getFirstQuarter(), areaCounter.getSecondQuarter(),
-                areaCounter.getThirdQuarter(), areaCounter.getFourthQuarter() };
-
-        return new CompositeDataSupport(type, names, values);
+    public AreaCounter getAreaCount() throws OpenDataException {
+//        String[] names = { "First Quarter", "Second Quarter", "Third Quarter", "Fourth Quarter" };
+//
+//        OpenType<?>[] itemTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
+//
+//        CompositeType type = new CompositeType(
+//                "AreaCounter", "Counters by quarters", names, names, itemTypes);
+//
+//        Object[] values = { areaCounter.getFirstQuarter(), areaCounter.getSecondQuarter(),
+//                areaCounter.getThirdQuarter(), areaCounter.getFourthQuarter() };
+//
+//        return new CompositeDataSupport(type, names, values);
+        return areaCounter;
     }
 
 }

@@ -12,5 +12,5 @@ public interface PointsCounterMXBean {
     int getPointsCount();
     int getMissesCount();
     
-    CompositeData getAreaCount() throws OpenDataException;
+    AreaCounter getAreaCount() throws OpenDataException;
 }

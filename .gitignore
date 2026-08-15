@@ -51,3 +51,6 @@ src/main/frontend/dist
 # 4 lab properties to connect database
 application.properties
 /.gradle/
+/jmxremote.password
+/server_keystore.jks
+/~$B_4_Соловьёв_P3230.docx
