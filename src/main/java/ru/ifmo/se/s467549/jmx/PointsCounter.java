@@ -18,7 +18,7 @@ public class PointsCounter extends NotificationBroadcasterSupport implements Poi
     private MissPercentage missPercentage;
 
     @Autowired
-    public PointsCounter(MissPercentage missPercentage){
+    public PointsCounter(MissPercentage missPercentage) {
         this.missPercentage = missPercentage;
     }
 
@@ -29,19 +29,10 @@ public class PointsCounter extends NotificationBroadcasterSupport implements Poi
             this.missesCount += 1;
             this.consecutiveMisses += 1;
 
-            if (this.consecutiveMisses >= 3) {
-                Notification n = new Notification("consecutive misses", this, sequenceNumber++,
-                        System.currentTimeMillis());
+            if (this.consecutiveMisses == 3) {
+                Notification n = new Notification("consecutive misses", this, sequenceNumber++, System.currentTimeMillis());
 
-                /*
-                 * Now send the notification using the sendNotification method
-                 * inherited from the parent class
-                 * NotificationBroadcasterSupport.
-                 */
                 sendNotification(n);
-
-                this.consecutiveMisses = 0;
-
             }
 
         } else {
@@ -54,11 +45,15 @@ public class PointsCounter extends NotificationBroadcasterSupport implements Poi
     }
 
     public int getPointsCount() {
-        return pointsCount;
+        return this.pointsCount;
     }
 
     public int getMissesCount() {
-        return missesCount;
+        return this.missesCount;
+    }
+
+    public int getConsecutiveMisses() {
+        return this.consecutiveMisses;
     }
 
     public AreaCounter getAreaCount() throws OpenDataException {

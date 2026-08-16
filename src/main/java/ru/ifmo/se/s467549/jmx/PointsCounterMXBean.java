@@ -9,7 +9,10 @@ By default, an interface is an MXBean interface if it is public and its name end
 @MXBean
 public interface PointsCounterMXBean {
     int getPointsCount();
+
     int getMissesCount();
-    
+
+    int getConsecutiveMisses();
+
     AreaCounter getAreaCount() throws OpenDataException;
 }
