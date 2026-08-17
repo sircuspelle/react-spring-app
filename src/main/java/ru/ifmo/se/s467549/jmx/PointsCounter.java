@@ -26,6 +26,9 @@ public class PointsCounter extends NotificationBroadcasterSupport implements Poi
         this.pointsCount += 1;
 
         if (!isHit) {
+            PointMissEvent pointMissEvent = new PointMissEvent();
+            pointMissEvent.commit();
+
             this.missesCount += 1;
             this.consecutiveMisses += 1;
 

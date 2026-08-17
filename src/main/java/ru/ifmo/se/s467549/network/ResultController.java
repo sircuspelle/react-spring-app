@@ -14,6 +14,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ru.ifmo.se.s467549.jmx.PointSetEvent;
 import ru.ifmo.se.s467549.jmx.PointsCounter;
 import ru.ifmo.se.s467549.model.Result;
 import ru.ifmo.se.s467549.model.User;
@@ -83,6 +84,9 @@ public class ResultController {
     @PostMapping("/api/results")
     public ResponseEntity<?> newResult(@Valid @RequestBody Result newResult, @AuthenticationPrincipal User user) {
 
+        PointSetEvent pointSetEvent = new PointSetEvent();
+        pointSetEvent.begin();
+
         Double x = newResult.getX();
         Double y = newResult.getY();
         Double r = newResult.getR();
@@ -97,6 +101,8 @@ public class ResultController {
 
         // save to database and return ResponseEntity of response
         EntityModel<Result> entityModel = assembler.toModel(repository.save(newResult));
+
+        pointSetEvent.commit();
 
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
