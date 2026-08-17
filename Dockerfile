@@ -6,5 +6,9 @@ RUN ./gradlew labBuild --no-daemon
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
+COPY --from=builder /app/application.properties application.properties
+COPY --from=builder /app/jmxremote.access jmxremote.access
+COPY --from=builder /app/jmxremote.password jmxremote.password
+RUN chmod 600 jmxremote.password
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]

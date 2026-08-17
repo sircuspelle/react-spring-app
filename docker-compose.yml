@@ -14,6 +14,8 @@ services:
     env_file: .env
     ports:
       - "8080:8080"
+      - "8888:8888"
+      - "8889:8889"
     environment:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "true"
@@ -22,6 +24,15 @@ services:
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+
+      JAVA_TOOL_OPTIONS: >-
+        -Dcom.sun.management.jmxremote.port=8888
+        -Dcom.sun.management.jmxremote.rmi.port=8889
+        -Dcom.sun.management.jmxremote.password.file=jmxremote.password
+        -Dcom.sun.management.jmxremote.access.file=jmxremote.access
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=127.0.0.1
+
     depends_on:
       - db
 
