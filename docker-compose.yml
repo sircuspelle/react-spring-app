@@ -29,8 +29,9 @@ services:
         -Dcom.sun.management.jmxremote.port=8888
         -Dcom.sun.management.jmxremote.rmi.port=8889
         -Dcom.sun.management.jmxremote.password.file=jmxremote.password
-        -Dcom.sun.management.jmxremote.ssl=false
         -Djava.rmi.server.hostname=127.0.0.1
+        -Djavax.net.ssl.keyStore=jmxserverkeystore
+        -Djavax.net.ssl.keyStorePassword=password
 
     depends_on:
       - db

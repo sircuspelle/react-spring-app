@@ -8,6 +8,7 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 COPY --from=builder /app/application.properties application.properties
 COPY --from=builder /app/jmxremote.password jmxremote.password
+COPY --from=builder /app/jmxserverkeystore jmxserverkeystore
 RUN chmod 600 jmxremote.password
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]
